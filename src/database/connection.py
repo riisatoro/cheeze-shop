@@ -1,4 +1,8 @@
 import sqlite3
+import uuid
+
+from database.models import User
+from security import hash_password
 
 
 class DBConnection:
@@ -11,6 +15,7 @@ class DBConnection:
         return self.conn.cursor()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.conn.commit()
         self.conn.close()
 
 
@@ -24,7 +29,19 @@ class DBManager:
                 username TEXT NOT NULL,
                 email TEXT NOT NULL,
                 password TEXT NOT NULL,
-                folder_hash TEXT NOT NULL
+                folder_hash TEXT NOT NULL,
+                UNIQUE(email, username)
             );
             """
+        )
+
+    @staticmethod
+    def create_user(cursor: sqlite3.Cursor, user: User):
+        folder_hash = uuid.uuid4().hex
+        password = hash_password(user.password)
+        cursor.execute(
+            """
+            INSERT INTO users (username, email, password, folder_hash) VALUES (?, ?, ?, ?);
+            """,
+            (user.username, user.email, password, folder_hash)
         )
