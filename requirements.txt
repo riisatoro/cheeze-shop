@@ -4,3 +4,4 @@ jinja2
 pydantic
 pyjwt
 bcrypt
+python-multipart
