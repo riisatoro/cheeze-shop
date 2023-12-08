@@ -1,8 +1,7 @@
 import sqlite3
 import uuid
 
-from database.models import User
-from security import hash_password
+from database.models import UserFromDB, RegistrationUser, UserToDB
 
 
 class DBConnection:
@@ -30,18 +29,30 @@ class DBManager:
                 email TEXT NOT NULL,
                 password TEXT NOT NULL,
                 folder_hash TEXT NOT NULL,
-                UNIQUE(email, username)
+                CONSTRAINT unique_email UNIQUE(email),
+                CONSTRAINT unique_username UNIQUE(username)
             );
             """
         )
 
     @staticmethod
-    def create_user(cursor: sqlite3.Cursor, user: User):
-        folder_hash = uuid.uuid4().hex
-        password = hash_password(user.password)
+    def create_user(cursor: sqlite3.Cursor, user: RegistrationUser):
+        user = UserToDB(**user.model_dump(), folder_hash=uuid.uuid4().hex)
         cursor.execute(
             """
             INSERT INTO users (username, email, password, folder_hash) VALUES (?, ?, ?, ?);
             """,
-            (user.username, user.email, password, folder_hash)
+            (user.username, user.email, user.password, user.folder_hash)
         )
+
+    @staticmethod
+    def get_user_by_email(cursor: sqlite3.Cursor, email: str) -> UserFromDB:
+        cursor.execute(
+            """
+            SELECT * FROM users WHERE email = ?;
+            """,
+            (email,)
+        )
+        user_tuple = cursor.fetchone()
+        fields = list(UserFromDB.__fields__.keys())
+        return UserFromDB(**{fields[index]: value for index, value in enumerate(user_tuple) })

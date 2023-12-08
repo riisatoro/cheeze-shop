@@ -8,7 +8,6 @@ from routers import users_router
 
 @asynccontextmanager
 async def prepare_db(_: FastAPI):
-    print()
     with DBConnection() as cursor:
         DBManager.create_database(cursor)
     yield

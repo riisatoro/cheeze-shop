@@ -6,6 +6,6 @@ class LoginCredentials(BaseModel):
     password: str
 
 
-class Profile(BaseModel):
+class UserProfile(BaseModel):
     username: str
     email: str
