@@ -9,3 +9,4 @@ class LoginCredentials(BaseModel):
 class UserProfile(BaseModel):
     username: str
     email: str
+    folder_hash: str

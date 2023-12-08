@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from database.connection import DBConnection, DBManager
-from routers import users_router
+from routers import users_router, files_router
 
 
 @asynccontextmanager
@@ -20,3 +20,4 @@ app = FastAPI(
 )
 
 app.include_router(users_router)
+app.include_router(files_router)
