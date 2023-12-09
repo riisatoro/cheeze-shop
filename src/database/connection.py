@@ -34,6 +34,19 @@ class DBManager:
             );
             """
         )
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS products (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                description TEXT NOT NULL,
+                price REAL NOT NULL,
+                image TEXT NULL,
+                stock INTEGER NULL
+            );
+            """
+        )
+
 
     @staticmethod
     def create_user(cursor: sqlite3.Cursor, user: RegistrationUser):
