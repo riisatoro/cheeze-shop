@@ -2,6 +2,7 @@ import sqlite3
 import uuid
 
 from database.models import UserFromDB, RegistrationUser, UserToDB
+from schemas import Product
 
 
 class DBConnection:
@@ -29,6 +30,7 @@ class DBManager:
                 email TEXT NOT NULL,
                 password TEXT NOT NULL,
                 folder_hash TEXT NOT NULL,
+                is_admin BOOLEAN DEFAULT FALSE,
                 CONSTRAINT unique_email UNIQUE(email),
                 CONSTRAINT unique_username UNIQUE(username)
             );
@@ -42,20 +44,30 @@ class DBManager:
                 description TEXT NOT NULL,
                 price REAL NOT NULL,
                 image TEXT NULL,
-                stock INTEGER NULL
+                stock REAL NULL
             );
             """
         )
-
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS orders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                request_id INTEGER NOT NULL,
+                product_id INTEGER NOT NULL,
+                quantity INTEGER NOT NULL,
+                FOREIGN KEY (product_id) REFERENCES products (id)
+            );
+            """
+        )
 
     @staticmethod
     def create_user(cursor: sqlite3.Cursor, user: RegistrationUser):
         user = UserToDB(**user.model_dump(), folder_hash=uuid.uuid4().hex)
         cursor.execute(
             """
-            INSERT INTO users (username, email, password, folder_hash) VALUES (?, ?, ?, ?);
+            INSERT INTO users (username, email, password, folder_hash, is_admin) VALUES (?, ?, ?, ?, ?);
             """,
-            (user.username, user.email, user.password, user.folder_hash)
+            (user.username, user.email, user.password, user.folder_hash, user.is_admin)
         )
 
     @staticmethod
@@ -69,3 +81,53 @@ class DBManager:
         user_tuple = cursor.fetchone()
         fields = list(UserFromDB.__fields__.keys())
         return UserFromDB(**{fields[index]: value for index, value in enumerate(user_tuple) })
+
+
+    @staticmethod
+    def get_product_list(cursor: sqlite3.Cursor) -> list[Product]:
+        cursor.execute(
+            """
+            SELECT * FROM products;
+            """
+        )
+        products_tuple = cursor.fetchall()
+        fields = list(Product.__fields__.keys())
+        return [
+            Product(
+                **{fields[index]: value for index, value in enumerate(product_tuple)}
+            )
+            for product_tuple in products_tuple
+        ]
+
+
+    @staticmethod
+    def get_product_by_id(cursor: sqlite3.Cursor, product_id: int):
+        cursor.execute(
+            """
+            SELECT * FROM products WHERE id = ?;
+            """,
+            (product_id,)
+        )
+        product_tuple = cursor.fetchone()
+        fields = list(Product.__fields__.keys())
+        return Product(**{fields[index]: value for index, value in enumerate(product_tuple) })
+
+    @staticmethod
+    def create_product(cursor: sqlite3.Cursor, product):
+        cursor.execute(
+            """
+            INSERT INTO products (name, description, price, stock) VALUES (?, ?, ?, ?);
+            """,
+            (product.name, product.description, product.price, product.stock)
+        )
+
+    @staticmethod
+    def patch_product(cursor: sqlite3.Cursor, product_id, patch_fields):
+        product = DBManager.get_product_by_id(cursor, product_id)
+        product = product.model_copy(update=patch_fields)
+        cursor.execute(
+            """
+            UPDATE products SET name = ?, description = ?, price = ?, image = ?, stock = ? WHERE id = ?;
+            """,
+            (product.name, product.description, product.price, product.image, product.stock, product.id)
+        )
