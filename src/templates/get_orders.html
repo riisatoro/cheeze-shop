@@ -1,0 +1,39 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<section class="section">
+    {% if order %}
+    <div class="container">
+        <h1 class="title">Ordered Items</h1>
+
+        {% for item in order_items %}
+        <div class="box">
+            <article class="media">
+                <figure class="media-left">
+                    <p class="image is-128x128">
+                        <img src="{% if item.1.image %}{{item.1.image}}{% else %}/media/products/default.jpg{% endif %}" alt="Item 1 Image">
+                    </p>
+                </figure>
+                <div class="media-content">
+                    <div class="content">
+                        <p>
+                            <strong>{{item.1.name}}</strong> <small>UAH {{item.1.price}}</small>
+                        </p>
+                        <p>Amount: {{item.2}}</p>
+                        <p>Total: UAH {{item.3}}</p>
+                    </div>
+                    <button class="button is-danger">Remove</button>
+                </div>
+            </article>
+        </div>
+        {% endfor %}
+
+    </div>
+    {% else %}
+    <div>
+        <h1 class="title">No Orders</h1>
+        <a href="/products" class="button is-primary">Go Buy some cheese</a>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

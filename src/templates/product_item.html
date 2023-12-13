@@ -1,0 +1,43 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <!-- Product Detail Container -->
+        <div class="columns">
+            <!-- Product Image -->
+            <div class="column is-half">
+                <figure class="image is-4by3">
+                    <img src="{% if product.image %}/{{ product.image }}{% else %}/media/products/default.jpg{% endif %}" alt="Product Image">
+                </figure>
+            </div>
+
+            <!-- Product Information -->
+            <div class="column is-half">
+                <h1 class="title">{{product.name}}</h1>
+                <p class="subtitle">Product ID: {{product.id}}</p>
+                <p class="content">{{product.description}}</p>
+                <p class="content">
+                    <strong>Price:</strong> UAH {{product.price}}
+                    <br>
+                    <strong>Stock:</strong> {{product.stock}} kg
+                </p>
+                {% if product.stock %}
+                <div class="buttons">
+                    <form action="/orders/add" method="POST" typeof="JSON">
+                        <input type="hidden" name="product_id" value="{{product.id}}">
+                        <input type="number" name="quantity" value="1" min="1" max="{{product.stock}}"> kg
+                        <button class="button is-primary" type="submit">Add to Cart</button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="buttons">
+                    <button class="button is-warning" disabled>Out of Stock</button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -15,6 +15,7 @@ class UserFromDB(BaseModel):
     email: str
     password: str
     folder_hash: str
+    is_admin: bool = False
 
 
 class UserToDB(BaseModel):
@@ -22,6 +23,7 @@ class UserToDB(BaseModel):
     email: str
     password: str
     folder_hash: str
+    is_admin: bool = False
 
     @field_validator("password")
     def make_password(cls, v: str):

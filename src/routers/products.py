@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, UploadFile
+from fastapi import APIRouter, Depends, UploadFile, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
 from database.connection import DBConnection, DBManager
 from database.dependencies import get_user_from_token
@@ -11,10 +13,23 @@ router = APIRouter(
 )
 
 
-@router.get("/")
-async def get_my_profile() -> list[Product]:
+templates = Jinja2Templates(directory="templates")
+
+
+@router.get("/", response_class=HTMLResponse)
+async def get_product_list(request: Request):
     with DBConnection() as conn:
-        return DBManager.get_product_list(conn)
+        products = DBManager.get_product_list(conn)
+
+    return templates.TemplateResponse("products.html", {"request": request, "products": products})
+
+
+@router.get("/{product_id}", response_class=HTMLResponse)
+async def get_product_by_id(request: Request, product_id: int):
+    with DBConnection() as conn:
+        product = DBManager.get_product_by_id(conn, product_id)
+
+    return templates.TemplateResponse("product_item.html", {"request": request, "product": product})
 
 
 @router.post("/new")

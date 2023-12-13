@@ -1,0 +1,30 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="form-container">
+    <!-- Login form -->
+    <div class="box">
+        <form>
+            <div class="field">
+                <label class="label">Email</label>
+                <div class="control">
+                    <input class="input" type="text" placeholder="e.g. AlexSmith" name="email">
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Password</label>
+                <div class="control">
+                    <input class="input" type="password" placeholder="********" name="password">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <button class="button is-primary">Login</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
